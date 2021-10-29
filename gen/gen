@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+############################################################################################################################
+# This short script generates random strings of characters (option -c), digits (-d), and pecial characters (-s).           #
+# Default length is 16 characters, but could be changed with -l option.                                                    #
+# The main purpose of this is to put the string into selections. For that, xclip is used ($ pacman -Syu xclip),            #
+# and this script will do nothing without it.                                                                              #
+# By default, strings will be placed in clipboard, but they could be placed into primary selection with option -1 instead. #
+# If both -1 and -3 options are used, string will be placed in both primary and clipboard selections.                      #
+# If -p option is specified, the generated string will be printed to STDOUT as well as put into clipboard.                 #
+############################################################################################################################
+
+# global vars
+# an array to generate from
+char_set=()
+# default pass code length
+length=16
+
+# prints usage line
+function print_usage {
+    cat <<END_USAGE
+Usage: gen [-c] [-d] [-s] [-l <lengh>] [-p] [-1] [-3] [-u] [-h]
+END_USAGE
+}
+
+function print_help {
+    print_usage
+    cat <<END_HELP
+
+Options:
+    -c             Include [a-zA-Z] characters
+    -d             Include numbers [0-9]
+    -s             Include special characters [+-?:@&#!*=()[]{}%]
+    -l <length>    Choose a length of the result string
+    -p             Print to stdout
+    -1             Copy the result string into p selection using xclip
+    -3             Copy the result string into c selection using xclip
+    -u|-usage      Print usage line
+    -h|-help       Print this help
+END_HELP
+}
+
+# xclip has to be installed so we can talk to clipboards
+# $DISPLAY has to be non-zero
+function check_requirements {
+	local proceed=true
+	xclip -version >/dev/null 2>&1 || proceed=false
+	[[ -n "$DISPLAY" ]] || proceed=false
+	[[ "$proceed" = true ]] && return 0 || return 1
+}
+
+# adds characters into char_set array
+function add_chars {
+	char_set+=({a..z})
+	char_set+=({A..Z})
+}
+
+# adds digits into char_set array
+function add_digits {
+	char_set+=({0..9})
+}
+
+# adds special characters into char_set array
+function add_schars {
+	char_set+=('+' '-' '?' ':' '@' '&' '#' '!' '*' '=' '(' ')' '[' ']' '{' '}' '%')
+}
+
+# generate random passcode from characters in char_set
+function gen_random {
+	local n
+	local pass
+	while (( length > ${#pass} )); do
+		n=$((RANDOM % ${#char_set[@]}))
+		pass="${pass}${char_set[n]}"
+	done
+	echo "$pass"
+}
+
+########
+# main #
+########
+
+check_requirements || { echo "xclip not present or there is no DISPLAY variable" 1>&2; exit 1; }
+print=false
+primary=false
+clipboard=false
+
+while getopts "l:cdsp13uh" opt; do
+	case $opt in
+		l)       length=$OPTARG           ;;
+		c)       add_chars                ;;
+		d)       add_digits               ;;
+		s)       add_schars               ;;
+		p)       print=true               ;;
+		1)       primary=true             ;;
+		3)       clipboard=true           ;;
+        u|usage) { print_usage; exit 0; } ;;
+        h|help)  { print_help ; exit 0; } ;;
+	esac
+done
+
+# some options are required
+(( ${#char_set[@]} == 0 )) && { print_usage 1>&2; exit 1; }
+
+# get string
+result_string=$(gen_random)
+
+# print to the tty
+[[ "$print" = true ]] && echo "$result_string"
+# put into selections
+[[ "$primary" = true ]] && echo -n "$result_string" | xclip -selection p
+[[ "$clipboard" = true ]] && echo -n "$result_string" | xclip -selection c
+# if neither -1 nor -3 are specified, place only into clipboard
+[[ "$primary" = false && "$clipboard" = false ]] && echo -n "$result_string" | xclip -selection c
+
+exit 0
+

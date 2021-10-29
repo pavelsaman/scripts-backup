@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+networkdevices="eth0 wlan0 eth1 wlan1"
+
+function memory () {
+    meminfo=$(cat /proc/meminfo)
+
+    memtotal=$(cat /proc/meminfo | grep MemTotal | cut -d':' -f2 | sed -E 's/( |[a-zA-Z])//g')
+    freememory=$(free | head -2 | tail -1 | sed -E 's/[ ]{2,}/ /g' | cut -d' ' -f4)
+    usedmemory=$(free | head -2 | tail -1 | sed -E 's/[ ]{2,}/ /g' | cut -d' ' -f3)
+    swaptotal=$(cat /proc/meminfo | grep SwapTotal | cut -d':' -f2 | sed -E 's/( |[a-zA-Z])//g')
+    freeswap=$(free | tail -1 | sed -E 's/[ ]{2,}/ /g' | cut -d' ' -f4)
+    usedswap=$(free | tail -1 | sed -E 's/[ ]{2,}/ /g' | cut -d' ' -f3)
+    
+    echo "===Memory==="
+    echo "MemTotal: $memtotal"
+    echo "FreeMemory: $freememory"
+    echo "UsedMemory: $usedmemory"
+    echo "SwapTotal: $swaptotal"
+    echo "FreeSwap: $freeswap"
+    echo "UsedSwap: $usedswap"
+}
+
+function cpu () {
+    procname=$(cat /proc/cpuinfo | grep "model name" | sed -E 's/([ ]{2,}|\t)/ /g' | head -1 | cut -d':' -f2 | sed -E 's/^[ ]//')
+    numofproc=$(cat /proc/cpuinfo | grep "model name" | sed -E 's/([ ]{2,}|\t)/ /g' | wc -l)
+    mhz=$(cat /proc/cpuinfo | grep "cpu MHz" | sed -E 's/[ \t:a-zA-Z]//g' | tr '\n' ' ')
+    cachesize=$(cat /proc/cpuinfo | grep "cache size" | sed -E 's/[ \t:a-zA-Z]//g' | tr '\n' ' ')
+
+    echo "===Processor==="
+    echo "Processor name: $procname"
+    echo "Number of processors: $numofproc"
+    echo "MHz: $mhz"
+    echo "CacheSize: $cachesize"
+
+}
+
+function network () {
+    echo "===Network==="
+
+    for device in $networkdevices; do
+        ipandmask=$(ip -4 addr show dev $device 2>/dev/null | grep inet | tr -s " " | cut -d" " -f3 | head -n 1)
+        [[ -n $ipandmask ]] && echo "IP and mask for ${device}: $ipandmask"
+    done
+}
+
+function user () {
+    currentuser=$(whoami)
+    gid=$(id | cut -d' ' -f2 | cut -d'=' -f2 | sed -E 's/[()a-z]//g')
+    groups=$(id | cut -d' ' -f3 | cut -d'=' -f2 | tr ',' ' ')
+    shell=$(cat /etc/passwd | grep $currentuser | cut -d':' -f7)
+    normalusers=$(awk -F: '$3 >= 1000 { print $1 }' /etc/passwd | tr '\n' ' ')
+    userswithbash=$(awk -F: '$7 == "/bin/bash" { print $1 }' /etc/passwd | tr '\n' ' ')
+    sizeofhome=$(du -s ~ | sed -E 's/[ \t]/ /g' | cut -d' ' -f1)
+    numberofaliases=$(alias | wc -l)
+
+    echo "===User==="
+    echo "Name: $currentuser"
+    echo "UID: $UID"
+    echo "GID: $gid"
+    echo "Groups: $groups"
+    echo "DefaultShell: $shell"
+    echo "Home: $HOME"
+    echo "SizeOfHome(${HOME}): $sizeofhome"
+    echo "NumberOfAliases: $numberofaliases"
+    echo "Users with UID >= 1000: $normalusers"
+    echo "Users with /bin/bash: $userswithbash"
+}
+
+#function filesystems () {
+    
+#}
+
+#function disk () {
+    
+#}
+
+###############################################################################
+
+memory
+cpu
+network
+user
+
+exit 0
+

@@ -1,0 +1,34 @@
+#!/bin/python
+
+# pss <PID>
+#  PSS is improved RSS, it discounts multiple count of shared libraries memory usage
+#  if multiple processes share one library, that one library is counted in each process
+#  memory usage, PSS divides the shared library memory usage by the number of processes that use it
+
+import sys, re
+
+def rss_of_process(pid):
+    with open(f"/proc/{pid}/smaps", "r") as fp:
+        return sum([int(x) for x in re.findall('^Rss:\s+(\d+)', fp.read(), re.M)])
+
+def pss_of_process(pid):
+    with open(f"/proc/{pid}/smaps", "r") as fp:
+        return sum([int(x) for x in re.findall('^Pss:\s+(\d+)', fp.read(), re.M)])
+
+def help(file_descriptor=sys.stdout):
+    print("pss <PID>", file=file_descriptor)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        help(sys.stderr)
+        exit(1)
+
+    if (sys.argv[1] == "--help"
+        or sys.argv[1] == "-h"):
+        help(sys.stdout)
+        exit(0)
+
+    print("PID RSS PSS")
+    print(f"{sys.argv[1]} {rss_of_process(sys.argv[1])} {pss_of_process(sys.argv[1])}")
+    
+    exit(0)

@@ -1,25 +1,11 @@
 #!/usr/bin/env bash
 
-############################################################################################################################
-# This short script generates random strings of characters (option -c), digits (-d), and pecial characters (-s).           #
-# Default length is 16 characters, but could be changed with -l option.                                                    #
-# The main purpose of this is to put the string into selections. For that, xclip is used ($ pacman -Syu xclip),            #
-# and this script will do nothing without it.                                                                              #
-# By default, strings will be placed in clipboard, but they could be placed into primary selection with option -1 instead. #
-# If both -1 and -3 options are used, string will be placed in both primary and clipboard selections.                      #
-# If -p option is specified, the generated string will be printed to STDOUT as well as put into clipboard.                 #
-############################################################################################################################
-
-# global vars
-# an array to generate from
 char_set=()
-# default pass code length
 length=16
 
-# prints usage line
 function print_usage {
     cat <<END_USAGE
-Usage: gen [-c] [-d] [-s] [-l <lengh>] [-p] [-1] [-3] [-u] [-h]
+Usage: gen [-c] [-d] [-s] [-l <lengh>] [-p] [-o] [-1] [-3] [-u] [-h]
 END_USAGE
 }
 
@@ -31,8 +17,9 @@ Options:
     -c             Include [a-zA-Z] characters
     -d             Include numbers [0-9]
     -s             Include special characters [+-?:@&#!*=()[]{}%]
+    -p             Create a passphrase of -l <length> words
     -l <length>    Choose a length of the result string
-    -p             Print to stdout
+    -o             Print to stdout
     -1             Copy the result string into p selection using xclip
     -3             Copy the result string into c selection using xclip
     -u|-usage      Print usage line
@@ -49,23 +36,19 @@ function check_requirements {
 	[[ "$proceed" = true ]] && return 0 || return 1
 }
 
-# adds characters into char_set array
 function add_chars {
 	char_set+=({a..z})
 	char_set+=({A..Z})
 }
 
-# adds digits into char_set array
 function add_digits {
 	char_set+=({0..9})
 }
 
-# adds special characters into char_set array
 function add_schars {
 	char_set+=('+' '-' '?' ':' '@' '&' '#' '!' '*' '=' '(' ')' '[' ']' '{' '}' '%')
 }
 
-# generate random passcode from characters in char_set
 function gen_random {
 	local n
 	local pass
@@ -76,6 +59,31 @@ function gen_random {
 	echo "$pass"
 }
 
+# create a passphrase out of an English dictionary of words
+# it looks for a dictionary in this directory
+function create_passphrase {
+    local dict="/usr/share/gen-dictionary/dictionary"
+    local last_line=$(/bin/wc -l "$dict" | /bin/cut -d' ' -f1)
+    local bucket_size=32767
+    local num_of_buckets=$(($last_line / $bucket_size))
+    local last_bucket_size=$((($num_of_buckets * $bucket_size - $last_line) * -1))
+    local num_of_words=0
+    local passphrase
+
+	while (( length > num_of_words )); do
+        selected_bucket=$((RANDOM % ($num_of_buckets + 1)))
+		random_in_bucket=$((RANDOM % $bucket_size))
+        (( $selected_bucket == $num_of_buckets )) && random_in_bucket=$((RANDOM % $last_bucket_size))
+        offset=$(($selected_bucket * $bucket_size))
+        selected_line=$(($offset + 1 + $random_in_bucket))
+        word=$(/bin/head -$selected_line $dict | /bin/tail -1 | /bin/tr -d '\n' | /bin/tr '[A-Z]' '[a-z]')
+        word="$word "
+        passphrase="${passphrase}${word}"
+	    ((num_of_words++))
+    done
+    echo "$passphrase"
+}
+
 ########
 # main #
 ########
@@ -84,14 +92,16 @@ check_requirements || { echo "xclip not present or there is no DISPLAY variable"
 print=false
 primary=false
 clipboard=false
+only_passphrase=false
 
-while getopts "l:cdsp13uh" opt; do
+while getopts "l:pcdso13uh" opt; do
 	case $opt in
 		l)       length=$OPTARG           ;;
+        p)       only_passphrase=true     ;;
 		c)       add_chars                ;;
 		d)       add_digits               ;;
 		s)       add_schars               ;;
-		p)       print=true               ;;
+		o)       print=true               ;;
 		1)       primary=true             ;;
 		3)       clipboard=true           ;;
         u|usage) { print_usage; exit 0; } ;;
@@ -100,10 +110,10 @@ while getopts "l:cdsp13uh" opt; do
 done
 
 # some options are required
-(( ${#char_set[@]} == 0 )) && { print_usage 1>&2; exit 1; }
+(( ${#char_set[@]} == 0 )) && [[ "$only_passphrase" = false ]] && { print_usage 1>&2; exit 1; }
 
 # get string
-result_string=$(gen_random)
+[[ "$only_passphrase" = false ]] && result_string=$(gen_random) || result_string=$(create_passphrase)
 
 # print to the tty
 [[ "$print" = true ]] && echo "$result_string"

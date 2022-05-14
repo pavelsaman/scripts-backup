@@ -95,18 +95,18 @@ clipboard=false
 only_passphrase=false
 
 while getopts "l:pcdso13uh" opt; do
-	case $opt in
-		l)       length=$OPTARG           ;;
+    case $opt in
+        l)       length=$OPTARG           ;;
         p)       only_passphrase=true     ;;
-		c)       add_chars                ;;
-		d)       add_digits               ;;
-		s)       add_schars               ;;
-		o)       print=true               ;;
-		1)       primary=true             ;;
-		3)       clipboard=true           ;;
+        c)       add_chars                ;;
+        d)       add_digits               ;;
+        s)       add_schars               ;;
+        o)       print=true               ;;
+        1)       primary=true             ;;
+        3)       clipboard=true           ;;
         u|usage) { print_usage; exit 0; } ;;
         h|help)  { print_help ; exit 0; } ;;
-	esac
+    esac
 done
 
 # some options are required

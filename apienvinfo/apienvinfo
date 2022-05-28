@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+NUMBER_OF_ENVS=14
+BASE_URL="https://api.slido-staging.com/"
+
+ENV_NUM=$1
+
+if [[ -z $ENV_NUM ]]; then
+    for (( en=1; en <= $NUMBER_OF_ENVS; en++ )) do
+        res=$(curl -s "${BASE_URL}development${en}/ping" 2>/dev/null)
+        [[ -n $res ]] && jq <<< $res
+        echo "============================================================"
+    done
+else
+    curl -s "${BASE_URL}development${ENV_NUM}/ping" 2>/dev/null | jq
+fi
+

@@ -9,11 +9,11 @@ get_timezone() {
 
 get_timezones() {
   local region="$1"
-  find $ZONEINFO_PATH/$region/* -print | rev | cut -d'/' -f1,2 | rev
+  find $ZONEINFO_PATH/$region/* | rev | cut -d'/' -f1,2 | rev
 }
 
 get_regions() {
-  find /usr/share/zoneinfo/ -maxdepth 1 -type d | rev | cut -d'/' -f1,2 | rev | sed 's/zoneinfo\///;/^[[:space:]]*$/d'
+  find $ZONEINFO_PATH/ -maxdepth 1 -type d | rev | cut -d'/' -f1,2 | rev | sed 's/zoneinfo\///;/^[[:space:]]*$/d'
 }
 
 set_timezone() {

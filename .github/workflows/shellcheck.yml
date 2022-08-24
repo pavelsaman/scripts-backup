@@ -15,3 +15,4 @@ jobs:
         with:
           severity: style
           check_together: 'yes'
+          ignore+paths: pss

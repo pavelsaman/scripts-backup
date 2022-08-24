@@ -18,13 +18,17 @@ installedAndExecutable() {
 
 print_help() {
   cat<<ENDHELP
-subdomains.sh [OPTIONS] <-d domain>
+Subdomains
 
-OPTIONS:
-  -d    domain to search for, e.g. "example.com"
-  -j    print to stdout in JSON format
-  -s    silent, no reinfo sult output to stdout
-  -h    show this help  
+Usage:
+  subdomains.sh [-j|-s] -d <domain>
+  subdomains.sh -h
+
+Options:
+  -d <domain>  Domain to search for, e.g. "example.com"
+  -j           Print result to stdout in JSON format
+  -s           Silent, no info output to stdout
+  -h           Show this help  
 ENDHELP
 }
 

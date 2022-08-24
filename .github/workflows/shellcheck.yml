@@ -6,7 +6,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - ".github/"
+      - ".github/**"
 
 jobs:
   shellcheck:
@@ -20,4 +20,4 @@ jobs:
         with:
           severity: style
           check_together: 'yes'
-          ignore+paths: pss
+          ignore_paths: pss

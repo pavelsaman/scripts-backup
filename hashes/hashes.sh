@@ -19,6 +19,6 @@ sha512=$(sha512sum "${1}" | cut -d' ' -f1)
 md5=$(md5sum "${1}" | cut -d' ' -f1)
 
 printf "%s\n\nsha1: %s\nsha224: %s\nsha256: %s\nsha384: %s\nsha512: %s\nmd5: %s\n" \
-  "${1}" "${sha1}" "${sha224}" "${sha256}" "${sha384}" "${sha512}" "{$md5}"
+  "${1}" "${sha1}" "${sha224}" "${sha256}" "${sha384}" "${sha512}" "${md5}"
 
 exit 0

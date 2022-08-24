@@ -25,14 +25,18 @@ set_timezone() {
 
 print_help() {
   cat <<END
-timezone [OPTIONS...]
+Timezone
 
-OPTIONS:
-  -a <region>     get all timezone in a region, e.g. Europe
-  -c              get current timezone
-  -s <timezone>   new timezone, e.g. Europe/Tallinn
-  -r              get all regions
-  -h              print this help
+Usage:
+  timezone.sh (-a <region>|-c|-s <timezone>|r)
+  timezone.sh -h
+
+Options:
+  -a <region>     Get all timezone in a region, e.g. "Europe"
+  -c              Get current timezone
+  -s <timezone>   New timezone, e.g. Europe/Tallinn
+  -r              Get all regions
+  -h              Print this help
 END
 }
 

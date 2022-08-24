@@ -2,6 +2,11 @@ name: Shellcheck
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - ".github/"
 
 jobs:
   shellcheck:

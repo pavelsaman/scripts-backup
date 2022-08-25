@@ -61,27 +61,27 @@ fi
 result_dir=~/.cache/subdomains/$(date "+%s")-"${domain}"
 mkdir --parents "${result_dir}"
 
-[[ ${silent} == false ]] && echo " [+] Getting subdomains from crt.sh..."
+[[ ${silent} = false ]] && echo " [+] Getting subdomains from crt.sh..."
 curl --silent "https://crt.sh/?q=${domain}&output=json" \
   | jq '.[].name_value' \
   | sed --regexp-extended 's/\\n/",\n"/g;s/"$/",/;s/[",]//g' > "${result_dir}/crt-all.txt"
 
-[[ ${silent} == false ]] && echo " [+] Getting a unique list of domains..."
+[[ ${silent} = false ]] && echo " [+] Getting a unique list of domains..."
 sort --unique "${result_dir}/crt-all.txt" \
   | grep --invert-match '[*]' > "${result_dir}/crt-uniq.txt"
 
-[[ ${silent} == false ]] && echo " [+] Getting a list of alive domains..."
-httprobe < "${result_dir}/crt-uniq.txt" \
+[[ ${silent} = false ]] && echo " [+] Getting a list of alive domains..."
+httprobe -t 5000 < "${result_dir}/crt-uniq.txt" \
   | sed --regexp-extended 's/^http(s)?:\/\///' \
   | sort --unique > "${result_dir}/alive.txt"
 
-[[ ${silent} == false ]] && echo " [+] Results are in ${result_dir}: crt-all.txt, crt-uniq.txt, and alive.txt"
+[[ ${silent} = false ]] && echo " [+] Results are in ${result_dir}: crt-all.txt, crt-uniq.txt, and alive.txt"
 
-if [[ ${tojson} == true ]]; then
-  [[ ${silent} == false ]] && echo " [+] alive.txt in JSON:"
+if [[ ${tojson} = true ]]; then
+  [[ ${silent} = false ]] && echo " [+] alive.txt in JSON:"
   sed --regexp-extended 's/^/"/;s/$/",/;1s/^/[/;$s/,$/]/' "${result_dir}/alive.txt" | jq
 else
-  [[ ${silent} == false ]] && echo " [+] alive.txt in plain text:"
+  [[ ${silent} = false ]] && echo " [+] alive.txt in plain text:"
   cat "${result_dir}/alive.txt"
 fi
 

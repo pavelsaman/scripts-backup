@@ -74,7 +74,7 @@ function create_passphrase {
 	while (( length > num_of_words )); do
     selected_bucket=$((RANDOM % (num_of_buckets + 1)))
 random_in_bucket=$((RANDOM % bucket_size))
-    (( selected_bucket == num_of_buckets )) && random_in_bucket=$((RANDOM % last_bucket_size))
+    (( selected_bucket = num_of_buckets )) && random_in_bucket=$((RANDOM % last_bucket_size))
     offset=$((selected_bucket * bucket_size))
     selected_line=$((offset + 1 + random_in_bucket))
     word=$(/bin/head -${selected_line} ${dict} | /bin/tail -1 | /bin/tr -d '\n' | /bin/tr '[:upper:]' '[:lower:]')
@@ -112,7 +112,7 @@ while getopts "l:pcdso13uh" opt; do
 done
 
 # some options are required
-(( ${#char_set[@]} == 0 )) && [[ "${only_passphrase}" = false ]] && { print_usage 1>&2; exit 1; }
+(( ${#char_set[@]} = 0 )) && [[ "${only_passphrase}" = false ]] && { print_usage 1>&2; exit 1; }
 
 # get string
 [[ "${only_passphrase}" = false ]] && result_string=$(gen_random) || result_string=$(create_passphrase)

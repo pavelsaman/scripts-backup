@@ -5,7 +5,7 @@ die() {
   exit 1
 }
 
-installedAndExecutable() {
+installed_and_executable() {
   cmd=$(command -v "${1}")
 
   [[ -n "${cmd}" ]] && [[ -f "${cmd}" ]] && [[ -x "${cmd}" ]]
@@ -14,5 +14,5 @@ installedAndExecutable() {
 
 deps=(curl jq httprobe)
 for dep in "${deps[@]}"; do
-  installedAndExecutable "${dep}" || die "Missing '${dep}' dependency or not executable"
+  installed_and_executable "${dep}" || die "Missing '${dep}' dependency or not executable"
 done

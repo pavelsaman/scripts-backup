@@ -2,21 +2,16 @@
 
 set -euo pipefail
 
-number_of_envs=14
-number_of_global_envs=4
 base_url="https://api.slido-staging.com/"
-global_api_path="global/api"
-
-###############################################################################
 
 die() {
   echo "Fatal: ${1}" >&2
   exit 1
 }
 
-installedAndExecutable() {
+installed_and_executable() {
   local name
-  name=$(command -v "${1}")
+  name="$(command -v "${1}")"
 
   [[ -n "${name}" ]] && [[ -f "${name}" ]] && [[ -x "${name}" ]]
   return $?
@@ -24,13 +19,17 @@ installedAndExecutable() {
 
 get_global_api_version() {
   local env_num="${1}"
+  local global_api_path="global/api"
+
   [[ "${env_num}" = 1 ]] && env_num=""
   
   if [[ -z "${env_num}" ]]; then
-    curl --silent "${base_url}${global_api_path}/ping" 2>/dev/null \
+    curl \
+      --silent "${base_url}${global_api_path}/ping" 2>/dev/null \
       | jq
   else
-    curl --silent "${base_url}${global_api_path}/development${env_num}/ping" 2>/dev/null \
+    curl \
+      --silent "${base_url}${global_api_path}/development${env_num}/ping" 2>/dev/null \
       | jq
   fi
 }
@@ -45,11 +44,11 @@ get_api_version() {
 
 show_help() {
     cat <<ENDHELP
-apienvinfo.sh [OPTIONS]
+apienvinfo.sh [OPTIONS...]
 
 Get info about staging api environments.
 
-OPTIONS:
+Options:
   -v <api_environment_num>    Get info about a specific api environment
   -g <api_environment_num>    Get info about a specific global api environment
   -a                          Author
@@ -57,41 +56,47 @@ OPTIONS:
 ENDHELP
 }
 
-###############################################################################
+check_deps() {
+  deps=(jq curl)
+  for dep in "${deps[@]}"; do
+    installed_and_executable "${dep}" || die "${dep} not installed"
+  done
+}
 
-deps=(jq curl)
-for dep in "${deps[@]}"; do
-  installedAndExecutable "${dep}" || die "${dep} not installed"
-done
+main() {
+  check_deps
 
-while getopts "v:g:ha:" opt
-do
-  case "${opt}" in
-    v) get_api_version "${OPTARG}"; concrete_version_requested=true        ;;
-    g) get_global_api_version "${OPTARG}"; concrete_version_requested=true ;;
-    h) show_help; exit 0                                                   ;;
-    a) author="${OPTARG}"                                                  ;;
-    *) show_help; exit 1                                                   ;;
-  esac
-done
+  local number_of_envs=14
+  local number_of_global_envs=4
 
-[[ "${concrete_version_requested:-false}" = true ]] && exit 0;
+  while getopts "v:g:ha:" opt; do
+    case "${opt}" in
+      v) get_api_version "${OPTARG}"; concrete_version_requested=true        ;;
+      g) get_global_api_version "${OPTARG}"; concrete_version_requested=true ;;
+      h) show_help; exit 0                                                   ;;
+      a) author="${OPTARG}"                                                  ;;
+      *) show_help; exit 1                                                   ;;
+    esac
+  done
 
-result=""
-for (( en=1; en <= number_of_global_envs; en++ )); do
-  global_api_version=$(get_global_api_version "${en}")
-  result="${result}\n${global_api_version}"
-done
+  [[ "${concrete_version_requested:-false}" = true ]] && exit 0;
 
-for (( en=1; en <= number_of_envs; en++ )); do
-  api_version=$(get_api_version "${en}")
-  result="${result}\n${api_version}"
-done
+  result=""
+  for (( en=1; en <= number_of_global_envs; en++ )); do
+    global_api_version="$(get_global_api_version "${en}")"
+    result="${result}\n${global_api_version}"
+  done
 
-if [[ -n "${author:-}" ]]; then
-  echo -e "${result}" | grep -A 8 -B 2 "${author}"
-else
-  echo -e "${result}" | jq
-fi
+  for (( en=1; en <= number_of_envs; en++ )); do
+    api_version="$(get_api_version "${en}")"
+    result="${result}\n${api_version}"
+  done
 
-exit 0
+  if [[ -n "${author:-}" ]]; then
+    echo -e "${result}" | grep -A 8 -B 2 "${author}"
+  else
+    echo -e "${result}" | jq
+  fi
+}
+
+main "${@}"

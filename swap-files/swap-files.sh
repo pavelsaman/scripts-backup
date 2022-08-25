@@ -12,7 +12,7 @@ fi
 cp -p "${2}" "${1}"
 cp -p "${1}".swap "${2}"
 if [ -f "${1}" ] && [ -f "${2}" ]; then
-    rm "${1}".swap
+  rm "${1}".swap
 fi
 
 exit 0

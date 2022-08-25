@@ -1,16 +1,17 @@
 #!/bin/sh
 
-[ $# -eq 0 ] && { echo "repeat <num> [char]" >&2; exit 1; }
+[ $# = 0 ] && { echo "repeat <num> [char]" >&2; exit 1; }
 
 char=#
-[ $# -eq 2 ] && char="${2}"
+[ $# = 2 ] && char="${2}"
 
 i=0
 result=
 while [ "${i}" -ne "${1}" ]; do
-    i=$((i + 1))
-    result="${result}${char}"
+  i=$((i + 1))
+  result="${result}${char}"
 done
 
 echo "${result}"
+
 exit 0

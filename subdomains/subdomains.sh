@@ -17,7 +17,7 @@ installed_and_executable() {
 }
 
 print_help() {
-  cat<<ENDHELP
+  cat <<ENDHELP
 Subdomains
 
 Usage:
@@ -49,13 +49,25 @@ main() {
 
   while getopts ":d:jsh" opt; do
     case "${opt}" in
-      d  ) domain="${OPTARG}"                                                     ;;
-      j  ) tojson=true                                                            ;;
-      s  ) silent=true                                                            ;;
-      h  ) print_help; exit 0                                                     ;;
-      \? ) echo "Unknown option: -${OPTARG}" >&2; exit 1                          ;;
-      :  ) echo "Missing option argument for -${OPTARG}" >&2; exit 1              ;;
-      *  ) echo "Unimplemented option: -${opt}. See help (-h option)" >&2; exit 1 ;;
+      d ) domain="${OPTARG}" ;;
+      j ) tojson=true        ;;
+      s ) silent=true        ;;
+      h )
+        print_help
+        exit 0
+        ;;
+      \?)
+        echo "Unknown option: -${OPTARG}" >&2
+        exit 1
+        ;;
+      : )
+        echo "Missing option argument for -${OPTARG}" >&2
+        exit 1
+        ;;
+      * )
+        echo "Unimplemented option: -${opt}. See help (-h option)" >&2
+        exit 1
+        ;;
     esac
   done
 
@@ -92,4 +104,4 @@ main() {
   fi
 }
 
-main "${@}"
+main "$@"

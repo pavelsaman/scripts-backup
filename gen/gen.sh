@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-char_set=()
-length=16
+declare -a char_set=()
+declare -i length=16
 
 print_usage() {
   cat <<END_USAGE
@@ -30,10 +30,12 @@ END_HELP
 # xclip has to be installed so we can talk to clipboards
 # $DISPLAY has to be non-zero
 check_requirements() {
-	local proceed=true
-	xclip -version >/dev/null 2>&1 || proceed=false
-	[[ -n "${DISPLAY}" ]] || proceed=false
-	[[ "${proceed}" = true ]] && return 0 || return 1
+	local -i proceed=0
+	
+  xclip -version >/dev/null 2>&1 || proceed=1
+	[[ -n "${DISPLAY}" ]] || proceed=1
+	
+  return "${proceed}"
 }
 
 add_chars() {
@@ -86,7 +88,10 @@ random_in_bucket=$((RANDOM % bucket_size))
 }
 
 main() {
-  check_requirements || { echo "xclip not present or there is no DISPLAY variable" 1>&2; exit 1; }
+  if ! check_requirements ; then
+    echo "xclip not present or there is no DISPLAY variable" 1>&2
+    exit 1
+  fi
   
   local print=false
   local primary=false
@@ -103,17 +108,29 @@ main() {
       o) print=true           ;;
       1) primary=true         ;;
       3) clipboard=true       ;;
-      u) print_usage; exit 0  ;;
-      h) print_help ; exit 0  ;;
-      *) print_help; exit 1   ;;
+      u)
+        print_usage
+        exit 0
+        ;;
+      h)
+        print_help
+        exit 0
+        ;;
+      *)
+        print_help
+        exit 1
+        ;;
     esac
   done
 
   # some options are required
-  (( ${#char_set[@]} == 0 )) && [[ "${only_passphrase}" = false ]] && { print_usage >&2; exit 1; }
+  if (( ${#char_set[@]} == 0 )) && [[ "${only_passphrase}" = false ]]; then
+    print_usage >&2
+    exit 1
+  fi
 
   # get string
-  [[ "${only_passphrase}" = false ]] && result_string=$(gen_random) || result_string=$(create_passphrase)
+  [[ "${only_passphrase}" = false ]] && result_string="$(gen_random)" || result_string="$(create_passphrase)"
 
   # print to the tty
   [[ "${print}" = true ]] && echo "${result_string}"
@@ -121,7 +138,9 @@ main() {
   [[ "${primary}" = true ]] && echo -n "${result_string}" | xclip -selection p
   [[ "${clipboard}" = true ]] && echo -n "${result_string}" | xclip -selection c
   # if neither -1 nor -3 are specified, place only into clipboard
-  [[ "${primary}" = false && "${clipboard}" = false ]] && echo -n "${result_string}" | xclip -selection c
+  if [[ "${primary}" = false ]] && [[ "${clipboard}" = false ]]; then
+    echo -n "${result_string}" | xclip -selection c
+  fi
 }
 
-main "${@}"
+main "$@"

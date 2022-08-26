@@ -66,16 +66,28 @@ check_deps() {
 main() {
   check_deps
 
-  local number_of_envs=14
-  local number_of_global_envs=4
+  local -i number_of_envs=14
+  local -i number_of_global_envs=4
 
   while getopts "v:g:ha:" opt; do
     case "${opt}" in
-      v) get_api_version "${OPTARG}"; concrete_version_requested=true        ;;
-      g) get_global_api_version "${OPTARG}"; concrete_version_requested=true ;;
-      h) show_help; exit 0                                                   ;;
-      a) author="${OPTARG}"                                                  ;;
-      *) show_help; exit 1                                                   ;;
+      v)
+        get_api_version "${OPTARG}"
+        concrete_version_requested=true
+        ;;
+      g)
+        get_global_api_version "${OPTARG}"
+        concrete_version_requested=true
+        ;;
+      h)
+        show_help
+        exit 0
+        ;;
+      a) author="${OPTARG}" ;;
+      *)
+        show_help
+        exit 1
+        ;;
     esac
   done
 
@@ -99,4 +111,4 @@ main() {
   fi
 }
 
-main "${@}"
+main "$@"

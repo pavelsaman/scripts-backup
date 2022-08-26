@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-base_url="https://api.slido-staging.com/"
+readonly base_url="https://api.slido-staging.com/"
 
 die() {
   echo "Fatal: ${1}" >&2

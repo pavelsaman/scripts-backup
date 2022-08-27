@@ -25,5 +25,6 @@ fi
 IFS=" " read -r -a files <<< "$@"
 
 for file in "${files[@]}"; do
-  date --reference="${file}" "+%Y-%m-%d %H:%M:%S"
+  d="$(date --reference="${file}" "+%Y-%m-%d %H:%M:%S")"
+  printf "%s: %s\n" "${file}" "${d}"
 done

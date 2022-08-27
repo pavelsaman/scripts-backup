@@ -10,6 +10,7 @@ die() {
 }
 
 installed_and_executable() {
+  local cmd
   cmd=$(command -v "${1}")
 
   [[ -n "${cmd}" ]] && [[ -f "${cmd}" ]] && [[ -x "${cmd}" ]]

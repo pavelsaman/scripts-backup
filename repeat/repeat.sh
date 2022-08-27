@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function repeat {
+repeat() {
   local char="${1}"
   local times="${2}"
   local counter=0

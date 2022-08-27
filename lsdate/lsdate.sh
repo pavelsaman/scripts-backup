@@ -2,7 +2,7 @@
 
 print_help() {
   cat <<END_HELP
-lsdate - display last modification time of a file
+lsdate - display last modification date and time of a file
 
 Usage:
   lsdate.sh <file>...

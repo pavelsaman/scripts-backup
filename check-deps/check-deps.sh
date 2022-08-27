@@ -9,7 +9,7 @@ installed_and_executable() {
   cmd=$(command -v "${1}")
 
   [[ -n "${cmd}" ]] && [[ -f "${cmd}" ]] && [[ -x "${cmd}" ]]
-  return ${?}
+  return $?
 }
 
 deps=(curl jq httprobe)

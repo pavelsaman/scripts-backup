@@ -83,7 +83,11 @@ main() {
   [[ ${silent} = false ]] && echo " [+] Getting subdomains from crt.sh..."
   curl --silent "https://crt.sh/?q=${domain}&output=json" \
     | jq '.[].name_value' \
-    | sed --regexp-extended 's/\\n/",\n"/g;s/"$/",/;s/[",]//g' > "${result_dir}/crt-all.txt"
+    | sed \
+      --expression 's/\\n/",\n"/g' \
+      --expression 's/"$/",/' \
+      --expression 's/[",]//g' \
+      > "${result_dir}/crt-all.txt"
 
   [[ ${silent} = false ]] && echo " [+] Getting a unique list of domains..."
   sort --unique "${result_dir}/crt-all.txt" \
@@ -98,7 +102,13 @@ main() {
 
   if [[ ${tojson} = true ]]; then
     [[ ${silent} = false ]] && echo " [+] alive.txt in JSON:"
-    sed --regexp-extended 's/^/"/;s/$/",/;1s/^/[/;$s/,$/]/' "${result_dir}/alive.txt" | jq
+    sed \
+      --expression 's/^/"/' \
+      --expression 's/$/",/' \
+      --expression '1s/^/[/' \
+      --expression '$s/,$/]/' \
+      "${result_dir}/alive.txt" \
+      | jq
   else
     [[ ${silent} = false ]] && echo " [+] alive.txt in plain text:"
     cat "${result_dir}/alive.txt"

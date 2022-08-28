@@ -5,6 +5,7 @@ set -euo pipefail
 declare -a deps=(dos2unix)
 
 installed_and_executable() {
+  local cmd
   cmd=$(command -v "${1}")
 
   [[ -n "${cmd}" ]] && [[ -f "${cmd}" ]] && [[ -x "${cmd}" ]]

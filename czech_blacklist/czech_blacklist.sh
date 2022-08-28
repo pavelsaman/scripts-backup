@@ -31,7 +31,9 @@ save_blacklist() {
   today="$(date --iso-8601=date)"
   checksum="$(sha256sum <<< "${blacklist}" | cut -d' ' -f1)"
 
-  echo "${blacklist}" > "${backup_folder}/${today}_${checksum}"
+  if ! find . -type f -name "*${checksum}" | grep . &>/dev/null ; then
+    echo "${blacklist}" > "${backup_folder}/${today}_${checksum}"
+  fi
 }
 
 check_deps() {

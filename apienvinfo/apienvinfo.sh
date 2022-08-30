@@ -52,6 +52,7 @@ Options:
   -v <api_environment_num>    Get info about a specific api environment
   -g <api_environment_num>    Get info about a specific global api environment
   -a                          Author
+  -p                          Ping production API.
   -h                          Show this help.
 ENDHELP
 }
@@ -69,7 +70,7 @@ main() {
   local -i number_of_envs=14
   local -i number_of_global_envs=4
 
-  while getopts "v:g:ha:" opt; do
+  while getopts "v:g:ha:p" opt; do
     case "${opt}" in
       v)
         get_api_version "${OPTARG}"
@@ -84,6 +85,12 @@ main() {
         exit 0
         ;;
       a) author="${OPTARG}" ;;
+      p)
+        readonly base_url_prod="https://api.sli.do"
+        curl --silent "${base_url_prod}/v0.5/ping" 2>/dev/null | jq
+        curl --silent "${base_url_prod}/global/api/ping" 2>/dev/null | jq
+        exit 0
+        ;;
       *)
         show_help
         exit 1

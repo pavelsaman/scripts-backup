@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 die() {
-  echo "Fatal: ${1}" >&2
+  echo "Fatal: $*" >&2
   exit 1
 }
 

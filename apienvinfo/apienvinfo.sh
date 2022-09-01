@@ -5,7 +5,7 @@ set -euo pipefail
 readonly base_url="https://api.slido-staging.com/"
 
 die() {
-  echo "Fatal: ${1}" >&2
+  echo "Fatal: $*" >&2
   exit 1
 }
 

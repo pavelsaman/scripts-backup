@@ -6,7 +6,7 @@ readonly backup_folder=~/czech-blacklist
 readonly url="https://blacklist.salamek.cz/api/blacklist"
 
 die() {
-  echo "Fatal: ${1}" >&2
+  echo "Fatal: $*" >&2
   exit 1
 }
 

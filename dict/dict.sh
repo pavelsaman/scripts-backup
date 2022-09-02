@@ -37,7 +37,7 @@ check_deps() {
 main() {
   check_deps
 
-  local word
+  local word=
   while getopts ":w:h" opt; do
     case "${opt}" in
       w ) word="${OPTARG}" ;;

@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-readonly base_url_prod="https://api.sli.do"
-readonly stream_base_url_prod="https://stream.sli.do"
+readonly base_url_prod="https://api.sli.do/"
+readonly stream_base_url_prod="https://stream.sli.do/"
 readonly base_url="https://api.slido-staging.com/"
 readonly stream_base_url="https://stream.slido-staging.com/"
 
@@ -20,7 +20,7 @@ installed_and_executable() {
   return $?
 }
 
-get_global_api_version() {
+get_global_api_stage_version() {
   local env_num="${1}"
   local global_api_path="global/api"
 
@@ -39,10 +39,10 @@ get_global_api_version() {
 
 get_version() {
   local url="${1}"
-  local env_num="${2}"
-  [[ "$env_num" = 1 ]] && env_num=""
+  local path_params="${2}"
+  [[ "$path_params" = development1 ]] && path_params="development"
 
-  curl --silent "${url}development${env_num}/ping" 2>/dev/null \
+  curl --silent "${url}${path_params}/ping" 2>/dev/null \
     | jq
 }
 
@@ -77,12 +77,12 @@ main() {
   while getopts "v:g:ha:p" opt; do
     case "${opt}" in
       v)
-        get_version "${base_url}" "${OPTARG}"
-        get_version "${stream_base_url}" "${OPTARG}"
+        get_version "${base_url}" "development${OPTARG}"
+        get_version "${stream_base_url}" "development${OPTARG}"
         concrete_version_requested=true
         ;;
       g)
-        get_global_api_version "${OPTARG}"
+        get_global_api_stage_version "${OPTARG}"
         concrete_version_requested=true
         ;;
       h)
@@ -91,9 +91,9 @@ main() {
         ;;
       a) author="${OPTARG}" ;;
       p)
-        curl --silent "${base_url_prod}/v0.5/ping" 2>/dev/null | jq
-        curl --silent "${stream_base_url_prod}/v0.5/ping" 2>/dev/null | jq
-        curl --silent "${base_url_prod}/global/api/ping" 2>/dev/null | jq
+        get_version "${base_url_prod}" "v0.5"
+        get_version "${stream_base_url_prod}" "v0.5"
+        get_version "${base_url_prod}" "global/api"
         exit 0
         ;;
       *)
@@ -107,15 +107,15 @@ main() {
 
   result=""
   for (( en=1; en <= number_of_global_envs; en++ )); do
-    global_api_version="$(get_global_api_version "${en}")"
+    global_api_version="$(get_global_api_stage_version "${en}")"
     result="${result}\n${global_api_version}"
   done
 
   for (( en=1; en <= number_of_envs; en++ )); do
-    api_version="$(get_version "${base_url}" "${en}")"
+    api_version="$(get_version "${base_url}" "development${en}")"
     result="${result}\n${api_version}"
     
-    stream_version="$(get_version "${stream_base_url}" "${en}")"
+    stream_version="$(get_version "${stream_base_url}" "development${en}")"
     result="${result}\n${stream_version}"
   done
 

@@ -2,7 +2,10 @@
 
 set -euo pipefail
 
+readonly base_url_prod="https://api.sli.do"
+readonly stream_base_url_prod="https://stream.sli.do"
 readonly base_url="https://api.slido-staging.com/"
+readonly stream_base_url="https://stream.slido-staging.com/"
 
 die() {
   echo "Fatal: $*" >&2
@@ -34,11 +37,12 @@ get_global_api_version() {
   fi
 }
 
-get_api_version() {
-  local env_num="${1}"
+get_version() {
+  local url="${1}"
+  local env_num="${2}"
   [[ "$env_num" = 1 ]] && env_num=""
 
-  curl --silent "${base_url}development${env_num}/ping" 2>/dev/null \
+  curl --silent "${url}development${env_num}/ping" 2>/dev/null \
     | jq
 }
 
@@ -73,7 +77,8 @@ main() {
   while getopts "v:g:ha:p" opt; do
     case "${opt}" in
       v)
-        get_api_version "${OPTARG}"
+        get_version "${base_url}" "${OPTARG}"
+        get_version "${stream_base_url}" "${OPTARG}"
         concrete_version_requested=true
         ;;
       g)
@@ -86,8 +91,8 @@ main() {
         ;;
       a) author="${OPTARG}" ;;
       p)
-        readonly base_url_prod="https://api.sli.do"
         curl --silent "${base_url_prod}/v0.5/ping" 2>/dev/null | jq
+        curl --silent "${stream_base_url_prod}/v0.5/ping" 2>/dev/null | jq
         curl --silent "${base_url_prod}/global/api/ping" 2>/dev/null | jq
         exit 0
         ;;
@@ -107,8 +112,11 @@ main() {
   done
 
   for (( en=1; en <= number_of_envs; en++ )); do
-    api_version="$(get_api_version "${en}")"
+    api_version="$(get_version "${base_url}" "${en}")"
     result="${result}\n${api_version}"
+    
+    stream_version="$(get_version "${stream_base_url}" "${en}")"
+    result="${result}\n${stream_version}"
   done
 
   if [[ -n "${author:-}" ]]; then

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 readonly base_url_prod="https://api.sli.do/"
-readonly stream_base_url_prod="https://stream.sli.do/"
+readonly stream_base_url_prod="https://app.sli.do/"
 readonly base_url="https://api.slido-staging.com/"
 readonly stream_base_url="https://stream.slido-staging.com/"
 
@@ -92,7 +92,9 @@ main() {
       a) author="${OPTARG}" ;;
       p)
         get_version "${base_url_prod}" "v0.5"
-        get_version "${stream_base_url_prod}" "v0.5"
+        get_version "${base_url_prod}" "us1/api/v0.5"
+        get_version "${stream_base_url_prod}" "eu1/stream/v0.5"
+        get_version "${stream_base_url_prod}" "us1/stream/v0.5"
         get_version "${base_url_prod}" "global/api"
         exit 0
         ;;

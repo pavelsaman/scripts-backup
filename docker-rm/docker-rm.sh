@@ -26,14 +26,16 @@ function show_help() {
     cat <<ENDHELP
 docker-image-rm.sh [OPTIONS...]
 
-Remove all docker images.
+Remove all docker images or containers.
 
 Options:
+  -c    Remove containers
+  -i    Remove images
   -h    Show this help
 ENDHELP
 }
 
-function remove_all() {
+function remove_all_images() {
   local -i image_count
   
   image_count="$(docker image ls | wc -l)"
@@ -45,11 +47,31 @@ function remove_all() {
   fi
 }
 
+function remove_all_containers() {
+  local -i image_count
+  
+  container_count="$(docker ps --all | wc -l)"
+  if (( container_count > 1 )); then
+    docker ps --all \
+      | grep --invert-match CONTAINER \
+      | awk '{print $1}' \
+      | xargs docker rm --force
+  fi
+}
+
 function main() {
   check_deps
 
-  while getopts "h" opt; do
+  while getopts "cih" opt; do
     case "${opt}" in
+      c)
+        remove_all_containers
+        exit 0
+        ;;
+      i)
+        remove_all_images
+        exit 0
+        ;;
       h)
         show_help
         exit 0
@@ -61,7 +83,8 @@ function main() {
     esac
   done
 
-  remove_all
+  echo "Use -c, or -i. See --help"
+  exit 1
 }
 
 main "$@"

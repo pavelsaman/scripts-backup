@@ -29,11 +29,13 @@ get_global_api_stage_version() {
   if [[ -z "${env_num}" ]]; then
     curl \
       --silent "${base_url}${global_api_path}/ping" 2>/dev/null \
-      | jq
+        | jq 2>/dev/null \
+        || echo "{ \"error\": \"API not available\" }" | jq
   else
     curl \
       --silent "${base_url}${global_api_path}/development${env_num}/ping" 2>/dev/null \
-      | jq
+        | jq 2>/dev/null \
+        || echo "{ \"error\": \"API ${env_num} not available\" }" | jq
   fi
 }
 
@@ -43,7 +45,8 @@ get_version() {
   [[ "$path_params" = development1 ]] && path_params="development"
 
   curl --silent "${url}${path_params}/ping" 2>/dev/null \
-    | jq
+    | jq 2>/dev/null \
+    || echo "{ \"error\": \"API ${path_params} not available\" }" | jq
 }
 
 show_help() {

@@ -10,3 +10,5 @@ done
 for file in *.MP4; do 
   ffmpeg -i "$file" -vcodec copy -acodec copy "new-$file"
 done
+
+chmod o-r new*.MP4

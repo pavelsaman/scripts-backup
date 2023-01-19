@@ -122,7 +122,7 @@ main() {
   done
 
   if [[ -n "${author:-}" ]]; then
-    echo -e "${result}" | grep -A 8 -B 2 "${author}"
+    echo -e "${result}" | jq "select(.branch|test(\"${author}\"))" 2>/dev/null
   else
     echo -e "${result}" | jq
   fi

@@ -50,12 +50,12 @@ show_help() {
     cat <<ENDHELP
 apienvinfo.sh [OPTIONS...]
 
-Get info about staging api environments.
+Ping APIs.
 
 Options:
-  -v <api_environment_num>    Get info about a specific api environment
-  -g <api_environment_num>    Get info about a specific global api environment
-  -a                          Author
+  -v <api_environment_num>    Ping specific api environment
+  -g <api_environment_num>    Ping specific global api environment
+  -a                          Filter envs based on author (based on branch property)
   -p                          Ping production API.
   -h                          Show this help.
 ENDHELP
